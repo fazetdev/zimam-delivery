@@ -3,9 +3,12 @@
 import { useLanguage } from '@/context/useLanguage'
 import { MapPin, Clock, MessageSquare } from 'lucide-react'
 
+type Platform = 'talabat' | 'jahez' | 'careem' | 'noon' | 'other'
+type Language = 'en' | 'ar'
+
 interface DeliveryCardProps {
   customer: string
-  platform: 'talabat' | 'jahez' | 'careem' | 'noon' | 'other'
+  platform: Platform
   fee: number
   area: string
   notes?: string
@@ -14,7 +17,7 @@ interface DeliveryCardProps {
   onDelete?: () => void
 }
 
-const platformColors = {
+const platformColors: Record<Platform, string> = {
   talabat: 'bg-red-100 text-red-700 border-red-200',
   jahez: 'bg-orange-100 text-orange-700 border-orange-200',
   careem: 'bg-purple-100 text-purple-700 border-purple-200',
@@ -22,7 +25,7 @@ const platformColors = {
   other: 'bg-gray-100 text-gray-700 border-gray-200',
 }
 
-const platformLabels = {
+const platformLabels: Record<Platform, Record<Language, string>> = {
   talabat: { en: 'Talabat', ar: 'طلبات' },
   jahez: { en: 'Jahez', ar: 'جاهز' },
   careem: { en: 'Careem', ar: 'كريم' },
@@ -40,7 +43,7 @@ export default function DeliveryCard({
   onEdit,
   onDelete,
 }: DeliveryCardProps) {
-  const { language } = useLanguage()
+  const { language } = useLanguage() as { language: Language }
 
   return (
     <div className="bg-white rounded-xl p-4 shadow border border-gray-100 hover:shadow-md transition-shadow">
@@ -58,7 +61,7 @@ export default function DeliveryCard({
             </span>
           </div>
         </div>
-        
+
         <div className="text-right">
           <p className="text-xl font-bold text-green-600">AED {fee}</p>
           <p className="text-xs text-gray-500">{language === 'ar' ? 'رسوم التوصيل' : 'Delivery Fee'}</p>

@@ -1,120 +1,74 @@
 'use client'
 
 import { useLanguage } from '@/context/useLanguage'
-import { TrendingUp, TrendingDown, Fuel, Utensils, Wrench, CreditCard, MoreHorizontal } from 'lucide-react'
 
 interface TransactionCardProps {
+  category: 'delivery' | 'fuel' | 'food' | 'maintenance' | 'toll' | 'shopping' | 'transport' | 'other'
   type: 'income' | 'expense'
   amount: number
-  category: 'delivery' | 'fuel' | 'food' | 'maintenance' | 'toll' | 'other'
-  description: string
-  time: string
-  onDelete?: () => void
+  notes?: string
+  date: string
   onEdit?: () => void
+  onDelete?: () => void
 }
 
-const categoryIcons = {
-  delivery: TrendingUp,
-  fuel: Fuel,
-  food: Utensils,
-  maintenance: Wrench,
-  toll: CreditCard,
-  other: MoreHorizontal,
-}
+type Language = 'en' | 'ar'
 
-const categoryColors = {
-  delivery: 'bg-green-100 text-green-600',
-  fuel: 'bg-red-100 text-red-600',
-  food: 'bg-orange-100 text-orange-600',
-  maintenance: 'bg-purple-100 text-purple-600',
-  toll: 'bg-blue-100 text-blue-600',
-  other: 'bg-gray-100 text-gray-600',
-}
-
-const categoryLabels = {
+const categoryLabels: Record<TransactionCardProps['category'], { en: string; ar: string }> = {
   delivery: { en: 'Delivery', ar: 'توصيل' },
   fuel: { en: 'Fuel', ar: 'وقود' },
   food: { en: 'Food', ar: 'طعام' },
   maintenance: { en: 'Maintenance', ar: 'صيانة' },
   toll: { en: 'Toll', ar: 'رسوم' },
+  shopping: { en: 'Shopping', ar: 'تسوق' },
+  transport: { en: 'Transport', ar: 'مواصلات' },
   other: { en: 'Other', ar: 'أخرى' },
 }
 
 export default function TransactionCard({
+  category,
   type,
   amount,
-  category,
-  description,
-  time,
-  onDelete,
+  notes,
+  date,
   onEdit,
+  onDelete,
 }: TransactionCardProps) {
-  const { language } = useLanguage()
-  const Icon = categoryIcons[category]
+  const { language } = useLanguage() as { language: Language }
 
   return (
     <div className="bg-white rounded-xl p-4 shadow border border-gray-100 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <div className={`p-2 rounded-lg mr-3 ${categoryColors[category]}`}>
-            <Icon size={20} />
-          </div>
-          
-          <div>
-            <div className="flex items-center">
-              <h4 className="font-medium text-gray-800">
-                {categoryLabels[category][language]}
-              </h4>
-              <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
-                type === 'income' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-              }`}>
-                {type === 'income' 
-                  ? (language === 'ar' ? 'دخل' : 'Income') 
-                  : (language === 'ar' ? 'مصروف' : 'Expense')
-                }
-              </span>
-            </div>
-            
-            <p className="text-sm text-gray-600 mt-1">{description}</p>
-            <p className="text-xs text-gray-500 mt-1 flex items-center">
-              <Clock size={12} className="mr-1" />
-              {time}
-            </p>
-          </div>
-        </div>
-        
-        <div className="text-right">
-          <p className={`text-lg font-bold ${
-            type === 'income' ? 'text-green-600' : 'text-red-600'
-          }`}>
-            {type === 'income' ? '+' : '-'}AED {amount}
-          </p>
-          
-          {(onEdit || onDelete) && (
-            <div className="flex space-x-2 mt-2">
-              {onEdit && (
-                <button
-                  onClick={onEdit}
-                  className="text-xs text-blue-600 hover:text-blue-800"
-                >
-                  {language === 'ar' ? 'تعديل' : 'Edit'}
-                </button>
-              )}
-              {onDelete && (
-                <button
-                  onClick={onDelete}
-                  className="text-xs text-red-600 hover:text-red-800"
-                >
-                  {language === 'ar' ? 'حذف' : 'Delete'}
-                </button>
-              )}
-            </div>
+      <div className="flex justify-between items-start mb-2">
+        <h4 className="font-medium text-gray-800">{categoryLabels[category][language]}</h4>
+        <p className={`text-sm font-semibold ${
+          type === 'income' ? 'text-green-600' : 'text-red-600'
+        }`}>
+          AED {amount}
+        </p>
+      </div>
+      {notes && <p className="text-xs text-gray-500 mb-2">{notes}</p>}
+      <p className="text-xs text-gray-400">{date}</p>
+
+      {(onEdit || onDelete) && (
+        <div className="flex justify-end space-x-2 mt-3 pt-2 border-t border-gray-100">
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
+            >
+              {language === 'ar' ? 'تعديل' : 'Edit'}
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              className="px-3 py-1 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
+            >
+              {language === 'ar' ? 'حذف' : 'Delete'}
+            </button>
           )}
         </div>
-      </div>
+      )}
     </div>
   )
 }
-
-// Need to import Clock from lucide
-import { Clock } from 'lucide-react'

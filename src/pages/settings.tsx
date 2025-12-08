@@ -1,20 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLanguage } from '@/context/useLanguage'
 import BottomNav from '@/components/BottomNav'
 import Header from '@/components/Header'
 import { Globe, Moon, Bell, Shield, Download, Trash2, LogOut } from 'lucide-react'
 
 export default function SettingsPage() {
-  const { language, toggleLanguage } = useLanguage()
+  const { language, setLanguage } = useLanguage()
   const [darkMode, setDarkMode] = useState(false)
   const [notifications, setNotifications] = useState(true)
   const [isClient, setIsClient] = useState(false)
 
-  useState(() => {
-    setIsClient(true)
-  })
+  useEffect(() => setIsClient(true), [])
 
   if (!isClient) return null
+
+  const toggleLanguage = () => setLanguage(language === 'ar' ? 'en' : 'ar')
 
   const settings = [
     {
@@ -61,9 +61,8 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-md mx-auto min-h-screen bg-white shadow-lg relative">
         <Header />
-        
+
         <main className="pb-20 px-4 pt-4">
-          {/* Page Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
               {language === 'ar' ? 'الإعدادات' : 'Settings'}
@@ -73,12 +72,11 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          {/* App Settings */}
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               {language === 'ar' ? 'إعدادات التطبيق' : 'App Settings'}
             </h2>
-            
+
             <div className="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
               {settings.map((setting, index) => {
                 const Icon = setting.icon
@@ -94,16 +92,16 @@ export default function SettingsPage() {
                           <p className="text-sm text-gray-600">{setting.subtitle}</p>
                         </div>
                       </div>
-                      
+
                       {setting.toggle ? (
-                        <button 
+                        <button
                           onClick={setting.action}
                           className={`relative inline-flex h-6 w-11 items-center rounded-full ${setting.value.includes('On') ? 'bg-blue-600' : 'bg-gray-300'}`}
                         >
                           <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${setting.value.includes('On') ? 'translate-x-6' : 'translate-x-1'}`} />
                         </button>
                       ) : (
-                        <button 
+                        <button
                           onClick={setting.action}
                           className="px-4 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200"
                         >
@@ -117,12 +115,11 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Data Management */}
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               {language === 'ar' ? 'إدارة البيانات' : 'Data Management'}
             </h2>
-            
+
             <div className="grid grid-cols-2 gap-4">
               {dataManagement.map((item) => {
                 const Icon = item.icon
@@ -139,12 +136,11 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Security */}
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               {language === 'ar' ? 'الأمان والخصوصية' : 'Security & Privacy'}
             </h2>
-            
+
             <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
               <div className="flex items-center mb-4">
                 <div className="p-2 rounded-lg mr-3 bg-green-100">
@@ -159,7 +155,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">
@@ -183,7 +179,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* App Info */}
           <div className="text-center text-gray-500 text-sm">
             <p>Zimam Delivery v1.0.0</p>
             <p className="mt-1">
@@ -191,13 +186,12 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          {/* Logout Button */}
           <button className="mt-8 w-full flex items-center justify-center py-3 bg-gray-100 text-gray-800 rounded-xl font-medium hover:bg-gray-200 transition">
             <LogOut size={20} className="mr-2" />
             {language === 'ar' ? 'تسجيل الخروج' : 'Log Out'}
           </button>
         </main>
-        
+
         <BottomNav />
       </div>
     </div>

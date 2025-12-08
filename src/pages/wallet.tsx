@@ -173,8 +173,8 @@ export default function WalletPage() {
                     type={transaction.type}
                     amount={transaction.amount}
                     category={transaction.category as any}
-                    description={transaction.description}
-                    time={transaction.time}
+                    notes={transaction.description}
+                    date={transaction.time}
                     onDelete={() => deleteTransaction(transaction.id)}
                   />
                 ))}
