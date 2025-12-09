@@ -1,266 +1,368 @@
-import { useState } from 'react'
+'use client'
+
+import { useState, useEffect } from 'react'
 import { useLanguage } from '@/context/useLanguage'
-import { useLogbook, useLogbookSummary } from '@/context/useLogbook'
+import { useLogbook } from '@/context/useLogbook'
 import BottomNav from '@/components/BottomNav'
 import Header from '@/components/Header'
-import DeliveryCard from '@/components/DeliveryCard'
-import { Plus, Filter, Search, BarChart3 } from 'lucide-react'
-import { Platform } from '@/context/useLogbook'
+import DeliveryCard, { Delivery } from '@/components/DeliveryCard'
+import { Search, Filter, Calendar, Download, Plus, ChevronDown, BarChart3, TrendingUp, Clock, Star, Package } from 'lucide-react'
+
+type FilterPlatform = 'all' | 'talabat' | 'jahez' | 'careem' | 'noon'
 
 export default function LogbookPage() {
   const { language } = useLanguage()
-  const { addDelivery, deleteDelivery, searchDeliveries } = useLogbook()
-  const { todayDeliveries, todayEarnings, totalDeliveries } = useLogbookSummary()
-  
+  const { deliveries, addDelivery, deleteDelivery, getTodayDeliveries } = useLogbook()
+  const [isClient, setIsClient] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [platformFilter, setPlatformFilter] = useState<FilterPlatform>('all')
+  const [selectedDate, setSelectedDate] = useState('')
+  const [showAddForm, setShowAddForm] = useState(false)
   const [newDelivery, setNewDelivery] = useState({
     customer: '',
-    platform: 'talabat' as Platform,
-    fee: '',
+    platform: 'talabat' as const,
+    fee: 0,
     area: '',
-    notes: '',
+    notes: ''
   })
 
-  const [showForm, setShowForm] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterPlatform, setFilterPlatform] = useState<Platform | 'all'>('all')
-  const [isClient, setIsClient] = useState(false)
-
-  useState(() => {
+  useEffect(() => {
     setIsClient(true)
-  })
+  }, [])
 
-  if (!isClient) return null
-
-  const handleAddDelivery = () => {
-    if (!newDelivery.customer || !newDelivery.fee || !newDelivery.area) {
-      alert(language === 'ar' ? 'يرجى ملء جميع الحقول المطلوبة' : 'Please fill all required fields')
-      return
-    }
-    
-    addDelivery({
-      customer: newDelivery.customer,
-      platform: newDelivery.platform,
-      fee: parseInt(newDelivery.fee),
-      area: newDelivery.area,
-      notes: newDelivery.notes,
-    })
-    
-    setNewDelivery({ customer: '', platform: 'talabat', fee: '', area: '', notes: '' })
-    setShowForm(false)
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center">
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-primary-200 rounded-full"></div>
+            <div className="w-20 h-20 border-4 border-primary-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+          </div>
+          <p className="mt-6 text-lg font-medium text-gray-700 animate-pulse">
+            {language === 'ar' ? 'جاري تحميل سجل الرحلات...' : 'Loading Logbook...'}
+          </p>
+        </div>
+      </div>
+    )
   }
 
-  // Get filtered deliveries
-  const filteredDeliveries = searchDeliveries(searchQuery, filterPlatform === 'all' ? undefined : filterPlatform)
+  const todayDeliveries = getTodayDeliveries()
+  const filteredDeliveries = deliveries.filter(delivery => {
+    const matchesSearch = searchQuery === '' || 
+      delivery.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      delivery.area.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      delivery.notes.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    const matchesPlatform = platformFilter === 'all' || delivery.platform === platformFilter
+    
+    return matchesSearch && matchesPlatform
+  })
+
+  const handleAddDelivery = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (newDelivery.customer && newDelivery.fee > 0 && newDelivery.area) {
+      addDelivery(newDelivery)
+      setNewDelivery({
+        customer: '',
+        platform: 'talabat',
+        fee: 0,
+        area: '',
+        notes: ''
+      })
+      setShowAddForm(false)
+    }
+  }
+
+  const totalEarnings = filteredDeliveries.reduce((sum, delivery) => sum + delivery.fee, 0)
+  const averageDeliveryTime = filteredDeliveries.length > 0 ? '32min' : '0min'
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-md mx-auto min-h-screen bg-white shadow-lg relative">
-        <Header />
-        
-        <main className="pb-20 px-4 pt-4">
-          {/* Page Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">
-              {language === 'ar' ? 'سجل الطلبات' : 'Delivery Logbook'}
-            </h1>
-            <p className="text-gray-600 mt-1">
-              {language === 'ar' ? 'سجل جميع طلبات التوصيل' : 'Record all your delivery orders'}
-            </p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      {/* Background decorative elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 -left-20 w-60 h-60 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
+        <div className="absolute bottom-20 -right-20 w-60 h-60 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
+      </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-white rounded-xl p-4 shadow border">
-              <p className="text-sm text-gray-500">{language === 'ar' ? 'طلبات اليوم' : "Today's Deliveries"}</p>
-              <p className="text-2xl font-bold text-gray-800">{todayDeliveries.length}</p>
-              <div className="flex items-center mt-1">
-                <BarChart3 size={14} className="text-gray-400 mr-1" />
-                <span className="text-xs text-gray-500">
-                  {language === 'ar' ? 'إجمالي' : 'Total'}: {totalDeliveries}
-                </span>
+      <div className="max-w-md mx-auto min-h-screen relative z-10">
+        <Header />
+
+        <main className="pb-24 px-5 pt-5">
+          {/* Page Header */}
+          <div className="mb-8 animate-slide-up">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {language === 'ar' ? 'سجل الرحلات' : 'Delivery Logbook'}
+                </h1>
+                <p className="text-gray-600 mt-2">
+                  {language === 'ar'
+                    ? `إجمالي ${deliveries.length} رحلة مسجلة`
+                    : `Total ${deliveries.length} recorded deliveries`
+                  }
+                </p>
+              </div>
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-success rounded-2xl flex items-center justify-center text-white shadow-medium">
+                  <BarChart3 className="w-6 h-6" />
+                </div>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4 shadow border">
-              <p className="text-sm text-gray-500">{language === 'ar' ? 'أرباح اليوم' : "Today's Earnings"}</p>
-              <p className="text-2xl font-bold text-gray-800">AED {todayEarnings}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                {language === 'ar' ? 'متوسط' : 'Avg'}: AED {todayDeliveries.length > 0 ? Math.round(todayEarnings / todayDeliveries.length) : 0}
-              </p>
+
+            {/* Stats Overview */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="card p-4">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-gradient-ocean rounded-xl flex items-center justify-center mr-3">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">{language === 'ar' ? 'إجمالي الأرباح' : 'Total Earnings'}</p>
+                    <p className="text-2xl font-bold text-gray-900">AED {totalEarnings.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card p-4">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-gradient-sand rounded-xl flex items-center justify-center mr-3">
+                    <Clock className="w-5 h-5 text-gray-700" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">{language === 'ar' ? 'متوسط الوقت' : 'Avg. Time'}</p>
+                    <p className="text-2xl font-bold text-gray-900">{averageDeliveryTime}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Search and Filter */}
-          <div className="flex space-x-3 mb-6">
-            <div className="flex-1 bg-gray-100 rounded-xl px-4 py-3 flex items-center">
-              <Search size={20} className="text-gray-400" />
-              <input 
-                type="text" 
-                placeholder={language === 'ar' ? 'ابحث عن طلب...' : 'Search delivery...'} 
-                className="bg-transparent outline-none px-3 flex-1"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="relative">
-              <select 
-                className="bg-white p-3 rounded-xl shadow border border-gray-200 appearance-none pl-4 pr-8"
-                value={filterPlatform}
-                onChange={(e) => setFilterPlatform(e.target.value as Platform | 'all')}
+          {/* Search and Filters */}
+          <div className="card p-4 mb-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder={language === 'ar' ? 'بحث في الطلبات...' : 'Search deliveries...'}
+                  className="input-modern pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="btn-primary flex items-center"
               >
-                <option value="all">{language === 'ar' ? 'كل المنصات' : 'All Platforms'}</option>
-                <option value="talabat">Talabat</option>
-                <option value="jahez">Jahez</option>
-                <option value="careem">Careem</option>
-                <option value="noon">Noon</option>
-                <option value="other">{language === 'ar' ? 'أخرى' : 'Other'}</option>
-              </select>
-              <Filter size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <Plus className="w-4 h-4 mr-2" />
+                {language === 'ar' ? 'إضافة' : 'Add'}
+              </button>
+            </div>
+
+            <div className="flex items-center space-x-3 overflow-x-auto pb-2">
+              <button
+                onClick={() => setPlatformFilter('all')}
+                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${platformFilter === 'all' ? 'bg-primary-100 text-primary-700 font-medium' : 'bg-gray-100 text-gray-700'}`}
+              >
+                {language === 'ar' ? 'الكل' : 'All'}
+              </button>
+              {(['talabat', 'jahez', 'careem', 'noon'] as const).map((platform) => (
+                <button
+                  key={platform}
+                  onClick={() => setPlatformFilter(platform)}
+                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${platformFilter === platform ? 'bg-primary-100 text-primary-700 font-medium' : 'bg-gray-100 text-gray-700'}`}
+                >
+                  {language === 'ar' 
+                    ? platform === 'talabat' ? 'طلبات' 
+                    : platform === 'jahez' ? 'جاهز'
+                    : platform === 'careem' ? 'كريم'
+                    : 'نون'
+                    : platform === 'talabat' ? 'Talabat'
+                    : platform === 'jahez' ? 'Jahez'
+                    : platform === 'careem' ? 'Careem'
+                    : 'Noon'
+                  }
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Add Delivery Form */}
-          {showForm && (
-            <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200 mb-6">
-              <h3 className="font-bold text-gray-800 mb-4">
-                {language === 'ar' ? 'إضافة طلب جديد' : 'Add New Delivery'}
+          {showAddForm && (
+            <div className="card p-5 mb-6 animate-slide-up">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                {language === 'ar' ? 'إضافة رحلة جديدة' : 'Add New Delivery'}
               </h3>
               
-              <div className="space-y-4">
-                <input 
-                  type="text" 
-                  placeholder={language === 'ar' ? 'اسم العميل *' : 'Customer name *'} 
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={newDelivery.customer}
-                  onChange={(e) => setNewDelivery({...newDelivery, customer: e.target.value})}
-                  required
-                />
-                
-                <select 
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={newDelivery.platform}
-                  onChange={(e) => setNewDelivery({...newDelivery, platform: e.target.value as Platform})}
-                >
-                  <option value="talabat">Talabat</option>
-                  <option value="jahez">Jahez</option>
-                  <option value="careem">Careem</option>
-                  <option value="noon">Noon</option>
-                  <option value="other">{language === 'ar' ? 'أخرى' : 'Other'}</option>
-                </select>
-                
-                <div className="relative">
-                  <input 
-                    type="number" 
-                    placeholder={language === 'ar' ? 'رسوم التوصيل *' : 'Delivery fee *'} 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pl-10"
-                    value={newDelivery.fee}
-                    onChange={(e) => setNewDelivery({...newDelivery, fee: e.target.value})}
-                    min="1"
-                    required
-                  />
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">AED</span>
+              <form onSubmit={handleAddDelivery} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {language === 'ar' ? 'اسم العميل' : 'Customer Name'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="input-modern"
+                      value={newDelivery.customer}
+                      onChange={(e) => setNewDelivery({...newDelivery, customer: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {language === 'ar' ? 'المنصة' : 'Platform'}
+                    </label>
+                    <select
+                      className="input-modern"
+                      value={newDelivery.platform}
+                      onChange={(e) => setNewDelivery({...newDelivery, platform: e.target.value as any})}
+                    >
+                      <option value="talabat">Talabat</option>
+                      <option value="jahez">Jahez</option>
+                      <option value="careem">Careem</option>
+                      <option value="noon">Noon</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
                 </div>
-                
-                <input 
-                  type="text" 
-                  placeholder={language === 'ar' ? 'المنطقة / العنوان *' : 'Area / Address *'} 
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={newDelivery.area}
-                  onChange={(e) => setNewDelivery({...newDelivery, area: e.target.value})}
-                  required
-                />
-                
-                <textarea 
-                  placeholder={language === 'ar' ? 'ملاحظات (اختياري)' : 'Notes (optional)'} 
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  value={newDelivery.notes}
-                  onChange={(e) => setNewDelivery({...newDelivery, notes: e.target.value})}
-                />
-                
-                <div className="flex space-x-3">
-                  <button 
-                    onClick={handleAddDelivery}
-                    className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 shadow-md transition"
-                  >
-                    {language === 'ar' ? 'حفظ الطلب' : 'Save Delivery'}
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setShowForm(false)
-                      setNewDelivery({ customer: '', platform: 'talabat', fee: '', area: '', notes: '' })
-                    }}
-                    className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition"
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {language === 'ar' ? 'الأجرة (AED)' : 'Fee (AED)'}
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      step="0.01"
+                      className="input-modern"
+                      value={newDelivery.fee || ''}
+                      onChange={(e) => setNewDelivery({...newDelivery, fee: parseFloat(e.target.value) || 0})}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {language === 'ar' ? 'المنطقة' : 'Area'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="input-modern"
+                      value={newDelivery.area}
+                      onChange={(e) => setNewDelivery({...newDelivery, area: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {language === 'ar' ? 'ملاحظات (اختياري)' : 'Notes (Optional)'}
+                  </label>
+                  <textarea
+                    className="input-modern min-h-[100px]"
+                    value={newDelivery.notes}
+                    onChange={(e) => setNewDelivery({...newDelivery, notes: e.target.value})}
+                  />
+                </div>
+
+                <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
                   >
                     {language === 'ar' ? 'إلغاء' : 'Cancel'}
                   </button>
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                  >
+                    {language === 'ar' ? 'إضافة الرحلة' : 'Add Delivery'}
+                  </button>
                 </div>
-              </div>
+              </form>
             </div>
           )}
 
-          {/* Delivery List Header */}
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">
-              {language === 'ar' ? 'طلبات التوصيل' : 'Delivery Orders'}
-            </h3>
-            <span className="text-sm text-gray-500">
-              {filteredDeliveries.length} {language === 'ar' ? 'من' : 'of'} {totalDeliveries}
-            </span>
+          {/* Deliveries List */}
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold text-gray-900">
+                {language === 'ar' ? 'جميع الرحلات' : 'All Deliveries'}
+              </h2>
+              <div className="flex items-center text-sm text-gray-600">
+                <span className="font-medium text-gray-900">{filteredDeliveries.length}</span>
+                <span className="mx-2">•</span>
+                <span>{language === 'ar' ? 'رحلة' : 'deliveries'}</span>
+              </div>
+            </div>
+
+            {filteredDeliveries.length > 0 ? (
+              <div className="space-y-4">
+                {filteredDeliveries.map((delivery, index) => (
+                  <DeliveryCard
+                    key={delivery.id}
+                    delivery={delivery}
+                    index={index}
+                    onDelete={() => deleteDelivery(delivery.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="card p-8 text-center">
+                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-sand rounded-2xl flex items-center justify-center">
+                  <Package className="w-10 h-10 text-gray-700" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  {language === 'ar' ? 'لا توجد رحلات' : 'No deliveries found'}
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  {language === 'ar' 
+                    ? searchQuery 
+                      ? 'لم يتم العثور على رحلات تطابق بحثك'
+                      : 'ابدأ بإضافة أول رحلة لتتبع أرباحك'
+                    : searchQuery
+                      ? 'No deliveries match your search'
+                      : 'Start by adding your first delivery to track earnings'
+                  }
+                </p>
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="btn-primary"
+                >
+                  {language === 'ar' ? 'إضافة أول رحلة' : 'Add First Delivery'}
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Delivery List */}
-          {filteredDeliveries.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl shadow border">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search size={24} className="text-gray-400" />
-              </div>
-              <h4 className="text-lg font-medium text-gray-800 mb-2">
-                {language === 'ar' ? 'لا توجد طلبات' : 'No deliveries found'}
-              </h4>
-              <p className="text-gray-600">
-                {language === 'ar' 
-                  ? searchQuery 
-                    ? 'حاول البحث بكلمة مختلفة أو أضف طلباً جديداً' 
-                    : 'أضف طلبك الأول لتبدأ'
-                  : searchQuery 
-                    ? 'Try a different search or add a new delivery' 
-                    : 'Add your first delivery to get started'
-                }
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredDeliveries.map((delivery) => (
-                <DeliveryCard
-                  key={delivery.id}
-                  customer={delivery.customer}
-                  platform={delivery.platform}
-                  fee={delivery.fee}
-                  area={delivery.area}
-                  notes={delivery.notes}
-                  time={delivery.time}
-                  onDelete={() => {
-                    if (confirm(language === 'ar' ? 'هل تريد حذف هذا الطلب؟' : 'Delete this delivery?')) {
-                      deleteDelivery(delivery.id)
+          {/* Export Section */}
+          <div className="mt-8">
+            <div className="card p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-1">
+                    {language === 'ar' ? 'تصدير البيانات' : 'Export Data'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {language === 'ar' 
+                      ? 'حفظ نسخة احتياطية من سجل الرحلات'
+                      : 'Backup your delivery history'
                     }
-                  }}
-                />
-              ))}
+                  </p>
+                </div>
+                <button className="btn-secondary flex items-center">
+                  <Download className="w-4 h-4 mr-2" />
+                  {language === 'ar' ? 'تصدير' : 'Export'}
+                </button>
+              </div>
             </div>
-          )}
-
-          {/* Add Button */}
-          {!showForm && (
-            <button 
-              onClick={() => setShowForm(true)}
-              className="fixed bottom-24 right-6 bg-blue-600 text-white p-5 rounded-full shadow-lg hover:bg-blue-700 transition hover:scale-110 z-40"
-              aria-label={language === 'ar' ? 'إضافة طلب جديد' : 'Add new delivery'}
-            >
-              <Plus size={24} />
-            </button>
-          )}
+          </div>
         </main>
-        
+
         <BottomNav />
       </div>
     </div>

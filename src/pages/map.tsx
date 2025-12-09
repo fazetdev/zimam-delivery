@@ -16,7 +16,7 @@ export default function MapPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-md mx-auto min-h-screen bg-white shadow-lg relative">
+      <div className="w-full min-h-screen bg-white md:max-w-md md:mx-auto shadow-lg relative">
         <Header />
         
         <main className="pb-20 px-4 pt-4">

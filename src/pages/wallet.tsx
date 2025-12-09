@@ -5,12 +5,12 @@ import BottomNav from '@/components/BottomNav'
 import Header from '@/components/Header'
 import TransactionCard from '@/components/TransactionCard'
 import StatsCard from '@/components/StatsCard'
-import { Plus, Minus, TrendingUp, TrendingDown } from 'lucide-react'
+import { Plus, Minus } from 'lucide-react'
 
 export default function WalletPage() {
   const { language } = useLanguage()
   const { addTransaction, deleteTransaction } = useWallet()
-  const { todayIncome, todayExpense, todayProfit, todayTransactions, weeklySummary } = useWalletSummary()
+  const { todayIncome, todayExpense, todayProfit, todayTransactions } = useWalletSummary()
   const [isClient, setIsClient] = useState(false)
 
   useState(() => {
@@ -20,18 +20,18 @@ export default function WalletPage() {
   if (!isClient) return null
 
   const handleAddTransaction = (type: 'income' | 'expense') => {
-    const categories = type === 'income' 
-      ? ['delivery'] 
+    const categories = type === 'income'
+      ? ['delivery']
       : ['fuel', 'food', 'maintenance', 'toll', 'other']
-    
+
     const descriptions = type === 'income'
-      ? language === 'ar' 
+      ? language === 'ar'
         ? ['توصيل طلبات', 'طلب جاهز', 'توصيل كريم', 'توصيل نون']
         : ['Talabat delivery', 'Jahez order', 'Careem delivery', 'Noon delivery']
       : language === 'ar'
         ? ['محطة وقود', 'غداء/عشاء', 'غسيل سيارة', 'رسوم سالك']
         : ['Gas station', 'Lunch/Dinner', 'Car wash', 'Salik toll']
-    
+
     addTransaction({
       type,
       amount: type === 'income' ? Math.floor(Math.random() * 100) + 50 : Math.floor(Math.random() * 30) + 10,
@@ -42,131 +42,73 @@ export default function WalletPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-md mx-auto min-h-screen bg-white shadow-lg relative">
+      <div className="w-full min-h-screen bg-white md:max-w-md md:mx-auto relative">
         <Header />
-        
+
         <main className="pb-20 px-4 pt-4">
           {/* Page Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
-              {language === 'ar' ? 'المحفظة اليومية' : 'Daily Wallet'}
+              {language === 'ar' ? 'المحفظة' : 'Wallet'}
             </h1>
             <p className="text-gray-600 mt-1">
-              {language === 'ar' ? 'تتبع دخلك ومصاريفك' : 'Track your income and expenses'}
+              {language === 'ar' ? 'تتبع أرباحك ومصاريفك' : 'Track your earnings and expenses'}
             </p>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <StatsCard
-              title={language === 'ar' ? 'إجمالي الدخل' : 'Total Income'}
-              value={`AED ${todayIncome}`}
-              icon={TrendingUp}
-              color="green"
-            />
-            <StatsCard
-              title={language === 'ar' ? 'إجمالي المصروف' : 'Total Expense'}
-              value={`AED ${todayExpense}`}
-              icon={TrendingDown}
-              color="red"
-            />
-          </div>
-
-          {/* Profit Card */}
-          <div className={`rounded-2xl p-6 text-white mb-6 ${
-            todayProfit >= 0 
-              ? 'bg-gradient-to-r from-green-600 to-green-700' 
-              : 'bg-gradient-to-r from-red-600 to-red-700'
-          }`}>
+          {/* Balance Summary */}
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-5 text-white mb-6">
             <p className="text-sm opacity-90">
-              {language === 'ar' ? 'ربح اليوم' : "Today's Profit"}
+              {language === 'ar' ? 'إجمالي الربح اليوم' : "Today's Total Profit"}
             </p>
-            <p className="text-4xl font-bold my-2">AED {todayProfit}</p>
+            <p className="text-3xl font-bold my-2">AED {todayProfit.toLocaleString()}</p>
             <div className="flex justify-between text-sm">
               <div>
                 <p className="opacity-90">{language === 'ar' ? 'الدخل' : 'Income'}</p>
-                <p className="font-semibold">AED {todayIncome}</p>
+                <p className="font-medium">AED {todayIncome.toLocaleString()}</p>
               </div>
               <div>
                 <p className="opacity-90">{language === 'ar' ? 'المصاريف' : 'Expenses'}</p>
-                <p className="font-semibold">AED {todayExpense}</p>
+                <p className="font-medium">AED {todayExpense.toLocaleString()}</p>
               </div>
             </div>
           </div>
-
-          {/* Weekly Summary Preview */}
-          {weeklySummary.length > 0 && (
-            <div className="bg-white rounded-xl p-4 shadow border border-gray-100 mb-6">
-              <h3 className="font-medium text-gray-800 mb-3">
-                {language === 'ar' ? 'ملخص الأسبوع' : 'Weekly Summary'}
-              </h3>
-              <div className="flex space-x-2 overflow-x-auto pb-2">
-                {weeklySummary.map((day, index) => (
-                  <div key={index} className="flex-shrink-0 w-16 text-center">
-                    <div className={`h-12 rounded-lg flex items-center justify-center ${
-                      day.profit >= 0 ? 'bg-green-50' : 'bg-red-50'
-                    }`}>
-                      <span className={`text-sm font-bold ${
-                        day.profit >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        AED {day.profit}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Quick Actions */}
-          <div className="flex space-x-4 mb-6">
-            <button 
+          <div className="flex space-x-3 mb-6">
+            <button
               onClick={() => handleAddTransaction('income')}
-              className="flex-1 bg-green-100 text-green-700 py-3 rounded-xl font-medium flex items-center justify-center hover:bg-green-200 transition shadow"
+              className="flex-1 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg p-4 text-center transition-colors"
             >
-              <Plus size={20} className="mr-2" />
-              {language === 'ar' ? 'إضافة دخل' : 'Add Income'}
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <Plus className="w-5 h-5 text-green-600" />
+              </div>
+              <span className="text-sm font-medium text-gray-800">
+                {language === 'ar' ? 'إضافة دخل' : 'Add Income'}
+              </span>
             </button>
-            <button 
+            
+            <button
               onClick={() => handleAddTransaction('expense')}
-              className="flex-1 bg-red-100 text-red-700 py-3 rounded-xl font-medium flex items-center justify-center hover:bg-red-200 transition shadow"
+              className="flex-1 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg p-4 text-center transition-colors"
             >
-              <Minus size={20} className="mr-2" />
-              {language === 'ar' ? 'إضافة مصروف' : 'Add Expense'}
+              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <Minus className="w-5 h-5 text-red-600" />
+              </div>
+              <span className="text-sm font-medium text-gray-800">
+                {language === 'ar' ? 'إضافة مصروف' : 'Add Expense'}
+              </span>
             </button>
           </div>
 
-          {/* Transaction List */}
+          {/* Today's Transactions */}
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {language === 'ar' ? 'المعاملات اليوم' : "Today's Transactions"}
-              </h3>
-              <span className="text-sm text-gray-500">
-                {todayTransactions.length} {language === 'ar' ? 'معاملة' : 'transactions'}
-              </span>
-            </div>
-
-            {todayTransactions.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-xl shadow border border-gray-100">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp size={24} className="text-gray-400" />
-                </div>
-                <h4 className="text-lg font-medium text-gray-800 mb-2">
-                  {language === 'ar' ? 'لا توجد معاملات' : 'No transactions yet'}
-                </h4>
-                <p className="text-gray-600">
-                  {language === 'ar' 
-                    ? 'ابدأ بإضافة دخل أو مصروف لليوم' 
-                    : 'Start by adding income or expense for today'
-                  }
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              {language === 'ar' ? 'معاملات اليوم' : "Today's Transactions"}
+            </h2>
+            
+            {todayTransactions.length > 0 ? (
+              <div className="space-y-3">
                 {todayTransactions.map((transaction) => (
                   <TransactionCard
                     key={transaction.id}
@@ -179,10 +121,25 @@ export default function WalletPage() {
                   />
                 ))}
               </div>
+            ) : (
+              <div className="bg-gray-50 rounded-lg border border-gray-200 p-8 text-center">
+                <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Plus className="w-6 h-6 text-gray-500" />
+                </div>
+                <h3 className="font-medium text-gray-800 mb-1">
+                  {language === 'ar' ? 'لا توجد معاملات' : 'No transactions'}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {language === 'ar' 
+                    ? 'ابدأ بإضافة دخلك ومصاريفك اليومية'
+                    : 'Start adding your daily income and expenses'
+                  }
+                </p>
+              </div>
             )}
           </div>
         </main>
-        
+
         <BottomNav />
       </div>
     </div>
