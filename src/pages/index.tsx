@@ -6,17 +6,31 @@ import Header from '@/components/Header'
 import DeliveryCard from '@/components/DeliveryCard'
 import { Package, Clock, Star, ChevronRight, MapPin, Users, CheckCircle, TrendingUp, Zap, Target, Trophy, Award, Compass, Sparkles } from 'lucide-react'
 
+// Added types to fix Vercel TypeScript error
+type StatCardData = {
+  title: string
+  value: string
+  icon: React.ComponentType<any>
+  color: string
+  gradient: string
+}
+
+type DashboardStatCardProps = {
+  stat: StatCardData
+  language: string
+}
+
 // Enhanced Dashboard Stat Card
-const DashboardStatCard = ({ stat, language }) => {
+const DashboardStatCard = ({ stat, language }: DashboardStatCardProps) => {
   const Icon = stat.icon
   return (
     <div className="group relative bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 hover:scale-[1.02]">
       {/* Premium Gradient Background */}
       <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-500`}></div>
-      
+
       {/* Animated Glow Effect */}
       <div className={`absolute -inset-0.5 bg-gradient-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-20 blur transition duration-500 group-hover:duration-200`}></div>
-      
+
       <div className="relative p-6">
         <div className="flex items-center justify-between mb-4">
           <div className={`p-3 rounded-2xl ${stat.color} bg-gradient-to-br ${stat.gradient} shadow-lg transform transition-transform group-hover:scale-110`}>
@@ -111,7 +125,7 @@ export default function HomePage() {
             {/* Decorative Elements */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-white/10 to-transparent rounded-full -translate-y-32 translate-x-32"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-emerald-500/20 to-transparent rounded-full translate-y-32 -translate-x-32"></div>
-            
+
             <div className="relative z-10">
               <div className="flex items-center mb-4">
                 <Trophy className="w-10 h-10 text-yellow-400 mr-3" />
@@ -119,7 +133,7 @@ export default function HomePage() {
                   {language === 'ar' ? 'مرحباً، البطل!' : 'Welcome back, Champion!'}
                 </h1>
               </div>
-              
+
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                   <p className="text-xl text-blue-100 mb-2">
@@ -135,7 +149,7 @@ export default function HomePage() {
                     }
                   </p>
                 </div>
-                
+
                 <button className="mt-4 md:mt-0 px-8 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-gray-900 font-bold rounded-xl hover:from-yellow-500 hover:to-amber-600 transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center">
                   <Sparkles className="mr-2" size={20} />
                   {language === 'ar' ? 'ابدأ الجولة 🚀' : 'Start Mission 🚀'}
@@ -146,18 +160,16 @@ export default function HomePage() {
 
           {/* Main Dashboard Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            
             {/* COLUMN 1 & 2: Main Content */}
             <div className="lg:col-span-2 space-y-6 lg:space-y-8">
-              
-              {/* Today's Stats - Enhanced with Responsive Layout */}
+              {/* Today's Stats */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 {todaysStats.map((stat) => (
                   <DashboardStatCard key={stat.title} stat={stat} language={language} />
                 ))}
               </div>
 
-              {/* Today's Deliveries - Premium Design */}
+              {/* Today's Deliveries */}
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/20">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
                   <div>
@@ -221,10 +233,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* COLUMN 3: Sidebar - Gulf Inspired */}
+            {/* COLUMN 3: Sidebar */}
             <div className="lg:col-span-1 space-y-6 lg:space-y-8">
-              
-              {/* Quick Actions - Premium Design */}
+              {/* Quick Actions */}
               <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl p-6 border border-white/20">
                 <div className="flex items-center mb-6">
                   <Award className="w-8 h-8 text-amber-500 mr-3" />
@@ -264,11 +275,10 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Performance Tips - Gulf Luxury Style */}
+              {/* Performance tips */}
               <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 p-6 shadow-xl">
-                {/* Decorative Pattern */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-400/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
-                
+
                 <div className="relative z-10">
                   <div className="flex items-center mb-4">
                     <div className="p-2 bg-gradient-to-br from-amber-500 to-yellow-400 rounded-lg">
@@ -295,7 +305,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Daily Challenge */}
+              {/* Daily challenge */}
               <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-100 p-6 shadow-xl">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-gray-900 text-lg">
@@ -322,7 +332,7 @@ export default function HomePage() {
           </div>
         </main>
 
-        {/* Bottom Navigation - Now properly positioned */}
+        {/* Bottom Navigation */}
         <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
           <BottomNav />
         </div>
