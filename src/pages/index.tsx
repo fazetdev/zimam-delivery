@@ -80,8 +80,7 @@ const DashboardStatCard = ({ stat, language }: DashboardStatCardProps) => {
 }
 
 export default function HomePage() {
-  const { language, toggleLanguage } = useLanguage()
-  const { todayDeliveries, todayEarnings } = useLogbookSummary()
+  const { language, setLanguage } = useLanguage()  const { todayDeliveries, todayEarnings } = useLogbookSummary()
   const [isClient, setIsClient] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 

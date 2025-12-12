@@ -53,7 +53,7 @@ export default function StatsCard({
         <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} items-start justify-between gap-4`}>
           
           {/* Text Content */}
-          <div className={isRTL ? 'text-right' : 'text-left'} dir-ltr'}>
+          <div className={isRTL ? 'text-right' : 'text-left'} dir={isRTL ? 'rtl' : 'ltr'}>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400 tracking-wide">
               {title}
             </p>
