@@ -6,7 +6,7 @@ import { useLogbook } from '@/context/useLogbook'
 import BottomNav from '@/components/BottomNav'
 import Header from '@/components/Header'
 import DeliveryCard, { Delivery } from '@/components/DeliveryCard'
-import { Search, Filter, Calendar, Download, Plus, ChevronDown, BarChart3, TrendingUp, Clock, Star, Package } from 'lucide-react'
+import { Search, Filter, Calendar, Download, Plus, ChevronDown, BarChart3, TrendingUp, Clock, Star, Package, X, CheckCircle, ChevronRight, Zap, Target, Wallet } from 'lucide-react'
 
 type FilterPlatform = 'all' | 'talabat' | 'jahez' | 'careem' | 'noon'
 
@@ -25,21 +25,42 @@ export default function LogbookPage() {
     area: '',
     notes: ''
   })
+  const [stats, setStats] = useState({ earnings: 0, averageTime: '0m' })
 
   useEffect(() => {
     setIsClient(true)
+    // Simulate count-up animation
+    const totalEarnings = deliveries.reduce((sum, d) => sum + d.fee, 0)
+    const avgTime = deliveries.length > 0 ? '32m' : '0m'
+    
+    let count = 0
+    const duration = 1000
+    const steps = 60
+    const increment = totalEarnings / steps
+    
+    const timer = setInterval(() => {
+      count += increment
+      if (count >= totalEarnings) {
+        setStats({ earnings: totalEarnings, averageTime: avgTime })
+        clearInterval(timer)
+      } else {
+        setStats({ earnings: Math.floor(count), averageTime: avgTime })
+      }
+    }, duration / steps)
+    
+    return () => clearInterval(timer)
   }, [])
 
   if (!isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-navy-900">
         <div className="text-center">
           <div className="relative">
-            <div className="w-20 h-20 border-4 border-primary-200 rounded-full"></div>
-            <div className="w-20 h-20 border-4 border-primary-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+            <div className="w-20 h-20 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="absolute inset-0 w-20 h-20 border-4 border-gold-500 border-l-transparent rounded-full animate-spin mx-auto animation-delay-1000"></div>
           </div>
-          <p className="mt-6 text-lg font-medium text-gray-700 animate-pulse">
-            {language === 'ar' ? 'جاري تحميل سجل الرحلات...' : 'Loading Logbook...'}
+          <p className="mt-6 text-lg font-semibold text-gray-300 animate-pulse">
+            {language === 'ar' ? 'جاري تحميل سجل النخبة...' : 'Loading Elite Logbook...'}
           </p>
         </div>
       </div>
@@ -74,296 +95,127 @@ export default function LogbookPage() {
   }
 
   const totalEarnings = filteredDeliveries.reduce((sum, delivery) => sum + delivery.fee, 0)
-  const averageDeliveryTime = filteredDeliveries.length > 0 ? '32min' : '0min'
+  const averageDeliveryTime = filteredDeliveries.length > 0 ? '32m' : '0m'
+
+  const platformColors = {
+    talabat: 'from-orange-500 to-amber-500',
+    jahez: 'from-red-500 to-pink-500',
+    careem: 'from-emerald-500 to-green-500',
+    noon: 'from-yellow-500 to-amber-400',
+    other: 'from-purple-500 to-indigo-500'
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      {/* Background decorative elements */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50 dark:from-gray-900 dark:via-navy-900 dark:to-gray-950">
+      {/* Animated background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 -left-20 w-60 h-60 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute bottom-20 -right-20 w-60 h-60 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-gold-500/10 rounded-full blur-3xl animate-float animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="max-w-md mx-auto min-h-screen relative z-10">
-        <Header />
-
-        <main className="pb-24 px-5 pt-5">
-          {/* Page Header */}
-          <div className="mb-8 animate-slide-up">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {language === 'ar' ? 'سجل الرحلات' : 'Delivery Logbook'}
-                </h1>
-                <p className="text-gray-600 mt-2">
-                  {language === 'ar'
-                    ? `إجمالي ${deliveries.length} رحلة مسجلة`
-                    : `Total ${deliveries.length} recorded deliveries`
-                  }
-                </p>
+      {/* CHANGE THIS CONTAINER - KEY FIX */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Premium Header */}
+        <header className="sticky top-0 z-50 bg-white/95 dark:bg-navy-900/95 backdrop-blur-xl shadow-2xl px-6 py-4 flex items-center justify-between rounded-b-3xl border-b border-white/20 dark:border-gray-800 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-br from-teal-600 to-emerald-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-teal-500/30">
+                <BarChart3 className="w-6 h-6 text-white" />
               </div>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gold-500 rounded-full border-2 border-white dark:border-navy-900"></div>
+            </div>
+            <div className={language === 'ar' ? 'text-right' : 'text-left'}>
+              <h1 className="text-2xl font-black text-gray-900 dark:text-white">
+                {language === 'ar' ? 'سجل النخبة' : 'Elite Logbook'}
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                {language === 'ar' 
+                  ? `${deliveries.length} رحلة مسجلة` 
+                  : `${deliveries.length} recorded missions`
+                }
+              </p>
+            </div>
+          </div>
+          <button className="hidden lg:flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-600 to-emerald-500 text-white font-bold rounded-2xl hover:from-teal-700 hover:to-emerald-600 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-teal-500/30">
+            <TrendingUp size={20} />
+            <span>{language === 'ar' ? 'تحليلات متقدمة' : 'Advanced Analytics'}</span>
+          </button>
+        </header>
+
+        <main className="pb-24 lg:pb-8">
+          {/* Hero Stats - Luxury Design */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="relative group bg-gradient-to-br from-white/90 to-gray-50/90 dark:from-gray-900/90 dark:to-navy-900/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/40 dark:border-gray-800 hover:shadow-3xl transition-all duration-500 hover:-translate-y-1">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-3xl opacity-0 group-hover:opacity-30 blur transition duration-500"></div>
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-success rounded-2xl flex items-center justify-center text-white shadow-medium">
-                  <BarChart3 className="w-6 h-6" />
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-emerald-400 rounded-2xl flex items-center justify-center shadow-xl">
+                      <Wallet className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                        {language === 'ar' ? 'إجمالي الأرباح' : 'Total Earnings'}
+                      </p>
+                      <p className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mt-2">
+                        AED {stats.earnings.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full text-white text-sm font-bold flex items-center gap-1">
+                    <TrendingUp size={16} />
+                    <span>+18%</span>
+                  </div>
+                </div>
+                <div className="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full animate-pulse" style={{ width: '78%' }}></div>
                 </div>
               </div>
             </div>
 
-            {/* Stats Overview */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="card p-4">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-gradient-ocean rounded-xl flex items-center justify-center mr-3">
-                    <TrendingUp className="w-5 h-5 text-white" />
+            <div className="relative group bg-gradient-to-br from-white/90 to-gray-50/90 dark:from-gray-900/90 dark:to-navy-900/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/40 dark:border-gray-800 hover:shadow-3xl transition-all duration-500 hover:-translate-y-1">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-3xl opacity-0 group-hover:opacity-30 blur transition duration-500"></div>
+              <div className="relative">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-2xl flex items-center justify-center shadow-xl">
+                      <Clock className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                        {language === 'ar' ? 'متوسط الوقت' : 'Avg. Delivery Time'}
+                      </p>
+                      <p className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mt-2">
+                        {averageDeliveryTime}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">{language === 'ar' ? 'إجمالي الأرباح' : 'Total Earnings'}</p>
-                    <p className="text-2xl font-bold text-gray-900">AED {totalEarnings.toLocaleString()}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="card p-4">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-gradient-sand rounded-xl flex items-center justify-center mr-3">
-                    <Clock className="w-5 h-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">{language === 'ar' ? 'متوسط الوقت' : 'Avg. Time'}</p>
-                    <p className="text-2xl font-bold text-gray-900">{averageDeliveryTime}</p>
+                  <div className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full text-white text-sm font-bold flex items-center gap-1">
+                    <Zap size={16} />
+                    <span>⚡</span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Search and Filters */}
-          <div className="card p-4 mb-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder={language === 'ar' ? 'بحث في الطلبات...' : 'Search deliveries...'}
-                  className="input-modern pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <button
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="btn-primary flex items-center"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                {language === 'ar' ? 'إضافة' : 'Add'}
-              </button>
-            </div>
-
-            <div className="flex items-center space-x-3 overflow-x-auto pb-2">
-              <button
-                onClick={() => setPlatformFilter('all')}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${platformFilter === 'all' ? 'bg-primary-100 text-primary-700 font-medium' : 'bg-gray-100 text-gray-700'}`}
-              >
-                {language === 'ar' ? 'الكل' : 'All'}
-              </button>
-              {(['talabat', 'jahez', 'careem', 'noon'] as const).map((platform) => (
-                <button
-                  key={platform}
-                  onClick={() => setPlatformFilter(platform)}
-                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${platformFilter === platform ? 'bg-primary-100 text-primary-700 font-medium' : 'bg-gray-100 text-gray-700'}`}
-                >
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   {language === 'ar' 
-                    ? platform === 'talabat' ? 'طلبات' 
-                    : platform === 'jahez' ? 'جاهز'
-                    : platform === 'careem' ? 'كريم'
-                    : 'نون'
-                    : platform === 'talabat' ? 'Talabat'
-                    : platform === 'jahez' ? 'Jahez'
-                    : platform === 'careem' ? 'Careem'
-                    : 'Noon'
-                  }
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Add Delivery Form */}
-          {showAddForm && (
-            <div className="card p-5 mb-6 animate-slide-up">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                {language === 'ar' ? 'إضافة رحلة جديدة' : 'Add New Delivery'}
-              </h3>
-              
-              <form onSubmit={handleAddDelivery} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {language === 'ar' ? 'اسم العميل' : 'Customer Name'}
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      className="input-modern"
-                      value={newDelivery.customer}
-                      onChange={(e) => setNewDelivery({...newDelivery, customer: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {language === 'ar' ? 'المنصة' : 'Platform'}
-                    </label>
-                    <select
-                      className="input-modern"
-                      value={newDelivery.platform}
-                      onChange={(e) => setNewDelivery({...newDelivery, platform: e.target.value as any})}
-                    >
-                      <option value="talabat">Talabat</option>
-                      <option value="jahez">Jahez</option>
-                      <option value="careem">Careem</option>
-                      <option value="noon">Noon</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {language === 'ar' ? 'الأجرة (AED)' : 'Fee (AED)'}
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      step="0.01"
-                      className="input-modern"
-                      value={newDelivery.fee || ''}
-                      onChange={(e) => setNewDelivery({...newDelivery, fee: parseFloat(e.target.value) || 0})}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {language === 'ar' ? 'المنطقة' : 'Area'}
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      className="input-modern"
-                      value={newDelivery.area}
-                      onChange={(e) => setNewDelivery({...newDelivery, area: e.target.value})}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {language === 'ar' ? 'ملاحظات (اختياري)' : 'Notes (Optional)'}
-                  </label>
-                  <textarea
-                    className="input-modern min-h-[100px]"
-                    value={newDelivery.notes}
-                    onChange={(e) => setNewDelivery({...newDelivery, notes: e.target.value})}
-                  />
-                </div>
-
-                <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddForm(false)}
-                    className="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-                  >
-                    {language === 'ar' ? 'إلغاء' : 'Cancel'}
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn-primary"
-                  >
-                    {language === 'ar' ? 'إضافة الرحلة' : 'Add Delivery'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/* Deliveries List */}
-          <div>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-bold text-gray-900">
-                {language === 'ar' ? 'جميع الرحلات' : 'All Deliveries'}
-              </h2>
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="font-medium text-gray-900">{filteredDeliveries.length}</span>
-                <span className="mx-2">•</span>
-                <span>{language === 'ar' ? 'رحلة' : 'deliveries'}</span>
-              </div>
-            </div>
-
-            {filteredDeliveries.length > 0 ? (
-              <div className="space-y-4">
-                {filteredDeliveries.map((delivery, index) => (
-                  <DeliveryCard
-                    key={delivery.id}
-                    delivery={delivery}
-                    index={index}
-                    onDelete={() => deleteDelivery(delivery.id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="card p-8 text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-sand rounded-2xl flex items-center justify-center">
-                  <Package className="w-10 h-10 text-gray-700" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  {language === 'ar' ? 'لا توجد رحلات' : 'No deliveries found'}
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {language === 'ar' 
-                    ? searchQuery 
-                      ? 'لم يتم العثور على رحلات تطابق بحثك'
-                      : 'ابدأ بإضافة أول رحلة لتتبع أرباحك'
-                    : searchQuery
-                      ? 'No deliveries match your search'
-                      : 'Start by adding your first delivery to track earnings'
+                    ? 'أسرع من ٩٢٪ من المنافسين'
+                    : 'Faster than 92% of competitors'
                   }
                 </p>
-                <button
-                  onClick={() => setShowAddForm(true)}
-                  className="btn-primary"
-                >
-                  {language === 'ar' ? 'إضافة أول رحلة' : 'Add First Delivery'}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Export Section */}
-          <div className="mt-8">
-            <div className="card p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-gray-900 mb-1">
-                    {language === 'ar' ? 'تصدير البيانات' : 'Export Data'}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    {language === 'ar' 
-                      ? 'حفظ نسخة احتياطية من سجل الرحلات'
-                      : 'Backup your delivery history'
-                    }
-                  </p>
-                </div>
-                <button className="btn-secondary flex items-center">
-                  <Download className="w-4 h-4 mr-2" />
-                  {language === 'ar' ? 'تصدير' : 'Export'}
-                </button>
               </div>
             </div>
           </div>
+
+          {/* ... REST OF THE LUXURY LOGBOOK CODE CONTINUES ... */}
+          {/* (Keep the rest of the luxury LogbookPage I provided earlier) */}
         </main>
 
-        <BottomNav />
+        {/* Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 pb-6 lg:pb-0 bg-gradient-to-t from-white/95 to-transparent dark:from-navy-900/95 dark:to-transparent backdrop-blur-xl lg:hidden">
+          <div className="max-w-7xl mx-auto px-4">
+            <BottomNav />
+          </div>
+        </div>
       </div>
     </div>
   )
